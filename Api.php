@@ -3,8 +3,6 @@
 	1ª será usada para verificar a temperatura da cidade
 	2ª Retornará um tipo de pokemon*/
 
-	$cidades = $_POST["sCidade"];
-
 	// Variavei globais
 	$tipo;
 	$selecao;
@@ -12,12 +10,17 @@
 	$data = array();
 	$pokemons = array();
 	$url_poke = array();
-	
-	// ApiWeatherMap
-	function return_clima() {
-		global $cidades, $tipo;
 
-		$ApiUrl = "https://api.openweathermap.org/data/2.5/weather?q=".$cidades."&appid=fa8db2d4aa3316723795b6f474fe738e&units=metric";
+	$cidades = $_POST["sCidade"];
+
+	if (!empty($_POST["sAux"])) {
+		$sAux = $_POST["sAux"];	
+	}
+
+	function return_data_pokemon(){
+		global $selecao, $data_pokemon, $url_poke;
+
+		$ApiUrl = $url_poke[$selecao];
 
 		$json = curl_init();
 
@@ -30,36 +33,12 @@
 		$response = curl_exec($json);
 
 		curl_close($json);
-		$data = json_decode($response);
-
-		$clima = $data->weather[0]->main;
-
-		if ($clima == "rain") {
-			$tipo = electric;
-		} else {
-			$celsius = $data->main->temp;
-
-			if ($celsius < 5) {
-				$tipo = 'ice';
-			} else if (($celsius >= 5) && ($celsius < 10)) {
-				$tipo = 'water';
-			} else if (($celsius >= 12) && ($celsius < 15)) {
-				$tipo = 'grass';
-			} else if (($celsius >= 15) && ($celsius < 21)) {
-				$tipo = 'ground';
-			} else if (($celsius >= 23) && ($celsius < 27)) {
-				$tipo = 'bug';
-			} else if (($celsius >= 27) && ($celsius <= 33)) {
-				$tipo = 'rock';
-			} else {
-				$tipo = 'fire';
-			}
-		}
+		$data_pokemon = json_decode($response);			
 	}
-
+	
 	// Api PokeApi
 	function return_pokemon() {
-		global $pokemons, $url_poke, $tipo, $selecao, $data;
+		global $pokemons, $url_poke, $tipo, $selecao, $data, $sAux;
 
 		$ApiUrl = "https://pokeapi.co/api/v2/type/".$tipo;
 
@@ -83,14 +62,28 @@
 			array_push($url_poke, $url);
 		}
 
-		$selecao = array_rand($pokemons);
+		do {
+
+			$selecao = array_rand($pokemons);
+
+			if ($selecao == $sAux) {
+				unset($pokemons[$selecao]);
+				unset($url_poke[$selecao]);
+			}
+
+		} while ($selecao == $sAux);
+
+		$sAux = $selecao;
+
+		return_data_pokemon();
 	}
 
-	function return_data_pokemon(){
-		global $selecao, $data_pokemon, $url_poke;
+	// ApiWeatherMap
+	function return_clima() {
+		global $cidades, $tipo;
 
-		$ApiUrl = $url_poke[$selecao];
-
+		$ApiUrl = "https://api.openweathermap.org/data/2.5/weather?q=".$cidades."&appid=fa8db2d4aa3316723795b6f474fe738e&units=metric";
+		
 		$json = curl_init();
 
 		curl_setopt($json, CURLOPT_HEADER, 0);
@@ -102,25 +95,42 @@
 		$response = curl_exec($json);
 
 		curl_close($json);
-		$data_pokemon = json_decode($response);			
+		$data = json_decode($response);
+
+		if ((isset($data->weather[0]->main)) || ($cidades == "")){
+			$clima = $data->weather[0]->main;
+
+			if ($clima == "rain") {
+				$tipo = electric;
+			} else {
+				$celsius = $data->main->temp;
+
+				if ($celsius < 5) {
+					$tipo = 'ice';
+				} else if (($celsius >= 5) && ($celsius < 10)) {
+					$tipo = 'water';
+				} else if (($celsius >= 12) && ($celsius < 15)) {
+					$tipo = 'grass';
+				} else if (($celsius >= 15) && ($celsius < 21)) {
+					$tipo = 'ground';
+				} else if (($celsius >= 23) && ($celsius < 27)) {
+					$tipo = 'bug';
+				} else if (($celsius >= 27) && ($celsius <= 33)) {
+					$tipo = 'rock';
+				} else {
+					$tipo = 'fire';
+				}
+			}
+
+			return_pokemon();
+		} else {
+		echo ('<script> alert("Cidade não encontrada, ou não informada!"); location="./index.html" </script>');
+		}		
 	}
 
-	function refresh_page(){
-		global $selecao, $pokemons;
-		
-		do {
-			$nova_selecao = array_rand($pokemons);	
-		} while ($selecao == $nova_selecao);
-
-		$selecao = $nova_selecao;
-
-		echo "<meta HTTP-EQUIV='refresh' CONTENT='5;URL=Api.php'>";
-	}
-
+	
 	// Executa funções principais
 	return_clima();
-	return_pokemon();
-	return_data_pokemon();
 ?>
 
 <html>
@@ -138,7 +148,7 @@
 
 			<div id="salto"></div>
 
-			<div id="pesquisa">
+			<div id="exibicao">
 				<table border="1px solid black">
 					<tr>
 						<td width="20%"> Nome: </td>
@@ -206,16 +216,20 @@
 
 			<div id="salto"></div>
 
-			<div id="pesquisa">
-				<table>
-					<tr>
-						<td align="center"> 
-							<input type="image" alt='button' src="Image/button.png" width="45px" height="45px" onclick="<?php refresh_page()?>"> 
-						</td>
-						<td/>
-						<td align="center"> <a href="Index.html"> Home </td>
-					</tr>
-				</table>				
+			<div id="exibicao">
+				<form method="post" action="Api.php">
+					<table>
+						<tr>
+							<td align="center">
+								<input type="hidden" name="sAux" 	value="<?php echo $sAux?>">
+								<input type="hidden" name="sCidade" value="<?php echo $cidades?>">
+								<input type="image" alt="Submit" src="Image/button.png" width="45px" height="45px">
+							</td>
+							<td/>
+							<td align="center"> <a href="Index.html"> Home </td>
+						</tr>
+					</table>	
+				</form>			
 			</div>
 		</div>
 	</body>
