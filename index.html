@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title> Pokemon </title>
+		<link rel="stylesheet" type="text/css"  href="CSS/style_css.css" />
+	</head>
+
+	<body>
+		<div id="principal">
+			<div id="banner">
+				<img src="Image/logo.png" height="75px">				
+			</div>
+
+			<div id="salto">				
+			</div>
+
+			<div id="pesquisa">
+				<br>
+
+				<form method="post" action="Api.php">
+					<table>
+						<tr>
+							<!-- Verificar possibilidade de busca da cidade via PHP
+							http://www.republicavirtual.com.br/busca_de_cep/PHP/#php -->
+							<td class="titulo">
+								<label> Cidade: </label>
+							</td>
+							<td>
+								<input type="text" name="sCidade" id="cidade">	
+							</td>
+							<td class="btPesquisar">
+								<input type="image" alt="Submit" src="Image/button.png" width="45px" height="45px">	
+							</td>
+						</tr>
+						
+					</table>					
+					
+					<br>
+					<br>					
+					
+				</form>
+
+				<br>
+
+				<img src="Image/blackground.jpg" width="100%" height="auto">
+			</div>
+		</div>
+	</body>
+</html>
