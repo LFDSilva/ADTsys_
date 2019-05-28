@@ -3,7 +3,7 @@ Processo Seletivo ADTsys
 
 ### Execução
 
-1. Copiar os arquivos e pastas para dentro da Pasta Htdocs, da pasta do xamarim, que fica no C:\;
+1. Copiar os arquivos e pastas para dentro da Pasta Htdocs, da pasta do Xampp, que fica no C:\;
 2. Iniciar os serviços do Xammp, caso não tenha ele instalado na máquina, pode ser obtido neste link: <https://www.apachefriends.org/pt_br/index.html>, desta forma será possível executar as funções do PHP;
 3. No navegador, colocar o seguinte endereço: <http:\\localhost\ADTsys_>
 4. Na página que abrir colocar a cidade que desejar, e clicar no botão de pesquisa, **Pokebola**.
